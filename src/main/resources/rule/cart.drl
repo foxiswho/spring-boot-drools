@@ -1,0 +1,91 @@
+package rules.remote;
+import com.foxwho.springbootdroolsdemo.model.CartModel
+import com.foxwho.springbootdroolsdemo.model.GoodsModel
+import com.foxwho.springbootdroolsdemo.model.StockModel
+import function cn.hutool.core.util.StrUtil.isNotBlank;
+import function cn.hutool.core.util.StrUtil.isBlank;
+import function com.foxwho.springbootdroolsdemo.util.StrDemoUtil.containsStr;
+
+dialect  "java"
+
+rule "goodsId not 0"
+    salience 1
+    when
+         $cart : CartModel(getGoodsId()==null || getGoodsId()<1,getNext()!=1)
+         eval(isBlank($cart.getName()))
+    then
+        $cart.setNext(1);
+        System.out.println("购物车中 商品数据 错误");
+        update($cart);
+end
+
+rule "good getName"
+    salience 2
+    when
+         $cart : CartModel(getGoodsId()>0,getNext()!=1)
+         eval(isBlank($cart.getName()))
+    then
+        $cart.setNext(1);
+        System.out.println("商品名称不能为空");
+        update($cart);
+end
+
+rule "is cart"
+    salience 3
+    when
+         $cart : CartModel(getGoodsId()>0)
+         eval(isNotBlank($cart.getName()))
+    then
+        System.out.println("这是购物车商品");
+end
+
+rule "商品名称包含 【奶粉】关键字不允许购买"
+    salience 4
+    no-loop true
+    when
+         $cart : CartModel(getNext()!=1)
+         eval(containsStr($cart.getName(),"奶粉"))
+    then
+        $cart.setNext(1);
+        System.out.println("商品名称包含 【奶粉】关键字不允许购买");
+
+        update($cart);
+end
+
+rule "购买数量"
+    salience 5
+    no-loop true
+    when
+         $cart : CartModel(getNum()<1,getNext()!=1)
+    then
+        $cart.setNext(1);
+        System.out.println("购买数量不能小于1");
+
+        update($cart);
+end
+rule "最大购买数"
+    salience 6
+    no-loop true
+    when
+        $goods : GoodsModel()
+        $cart : CartModel(getNum()<$goods.getMin(),getNext()!=1)
+    then
+        $cart.setNext(1);
+        System.out.println("最小购买数 不能小于"+$goods.getMin());
+        System.out.println("最大购买数 不能小于"+$goods.getMax());
+
+        update($cart);
+end
+rule "库存"
+    salience 7
+    no-loop true
+    when
+        $stock : StockModel()
+        $cart : CartModel(getNum()>$stock.getNum(),getNext()!=1)
+    then
+        $cart.setNext(1);
+        System.out.println("购物车 num:"+$cart.getNum());
+        System.out.println("库存 num:"+$stock.getNum());
+
+        update($cart);
+end
