@@ -11,7 +11,8 @@ dialect  "java"
 rule "goodsId not 0"
     salience 1
     when
-         $cart : CartModel(getGoodsId()==null || getGoodsId()<1,getNext()!=1)
+         $cart : CartModel(goodsId==null || goodsId<1,next!=1)
+//         $cart : CartModel(getGoodsId()==null || getGoodsId()<1,getNext()!=1)
          eval(isBlank($cart.getName()))
     then
         $cart.setNext(1);
@@ -22,7 +23,7 @@ end
 rule "good getName"
     salience 2
     when
-         $cart : CartModel(getGoodsId()>0,getNext()!=1)
+         $cart : CartModel(goodsId>0,next!=1)
          eval(isBlank($cart.getName()))
     then
         $cart.setNext(1);
@@ -33,17 +34,18 @@ end
 rule "is cart"
     salience 3
     when
-         $cart : CartModel(getGoodsId()>0)
+         $cart : CartModel(goodsId>0)
          eval(isNotBlank($cart.getName()))
     then
-        System.out.println("这是购物车商品");
+        System.out.println("这是购物车商品:"+$cart.getName());
 end
 
 rule "商品名称包含 【奶粉】关键字不允许购买"
+    enabled true
     salience 4
     no-loop true
     when
-         $cart : CartModel(getNext()!=1)
+         $cart : CartModel(next!=1)
          eval(containsStr($cart.getName(),"奶粉"))
     then
         $cart.setNext(1);
@@ -56,19 +58,19 @@ rule "购买数量"
     salience 5
     no-loop true
     when
-         $cart : CartModel(getNum()<1,getNext()!=1)
+         $cart : CartModel(num<1,next!=1)
     then
         $cart.setNext(1);
         System.out.println("购买数量不能小于1");
 
         update($cart);
 end
-rule "最大购买数"
+rule "最小/大购买数"
     salience 6
     no-loop true
     when
         $goods : GoodsModel()
-        $cart : CartModel(getNum()<$goods.getMin(),getNext()!=1)
+        $cart : CartModel(num<$goods.min||num>$goods.max,next!=1)
     then
         $cart.setNext(1);
         System.out.println("最小购买数 不能小于"+$goods.getMin());
@@ -81,7 +83,7 @@ rule "库存"
     no-loop true
     when
         $stock : StockModel()
-        $cart : CartModel(getNum()>$stock.getNum(),getNext()!=1)
+        $cart : CartModel(num>$stock.num,next!=1)
     then
         $cart.setNext(1);
         System.out.println("购物车 num:"+$cart.getNum());
