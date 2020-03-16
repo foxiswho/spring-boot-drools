@@ -5,11 +5,14 @@ import com.foxwho.springbootdroolsdemo.model.GoodsModel;
 import com.foxwho.springbootdroolsdemo.model.StockModel;
 import com.foxwho.springbootdroolsdemo.service.CartProces;
 import lombok.extern.slf4j.Slf4j;
+import org.kie.api.KieBase;
 import org.kie.api.builder.Message;
 import org.kie.api.builder.Results;
 import org.kie.api.io.Resource;
 import org.kie.api.io.ResourceType;
 import org.kie.api.runtime.KieSession;
+import org.kie.api.runtime.StatelessKieSession;
+import org.kie.api.runtime.rule.FactHandle;
 import org.kie.internal.io.ResourceFactory;
 import org.kie.internal.utils.KieHelper;
 import org.springframework.core.io.ClassPathResource;
@@ -39,6 +42,7 @@ public class CartProcessImpl implements CartProces {
             //log.info("fileInputStream3 ={}",fileInputStream);
             Resource resource = ResourceFactory.newInputStreamResource(inputStream);
             kieHelper.addResource(resource, ResourceType.DRL);
+            //kieHelper.addContent("",ResourceType.DRL);
 
             Results results = kieHelper.verify();
             if (results.hasMessages(Message.Level.ERROR)) {
@@ -47,13 +51,21 @@ public class CartProcessImpl implements CartProces {
                 throw new IllegalStateException("### errors ###");
             }
 
+            //KieBase build = kieHelper.build();
+
             //StatelessKieSession kieSession = kieHelper.build().newStatelessKieSession();
+            //StatelessKieSession statelessKieSession = build.newStatelessKieSession();
+            //KieSession kieSession2 = build.newKieSession();
             KieSession kieSession = kieHelper.build().newKieSession();
-            kieSession.insert(cartModel);
-            kieSession.insert(goods());
-            kieSession.insert(stock());
+            FactHandle insert = kieSession.insert(cartModel);
+            FactHandle insert1 = kieSession.insert(goods());
+            FactHandle insert2 = kieSession.insert(stock());
             int i = kieSession.fireAllRules();
             System.out.println(cartModel.getName() + "    " + i + "次");
+            //压测
+            kieSession.delete(insert);
+            kieSession.delete(insert1);
+            kieSession.delete(insert2);
             kieSession.dispose();
         } catch (Exception e) {
             //e.printStackTrace();
