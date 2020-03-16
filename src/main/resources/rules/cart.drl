@@ -1,4 +1,4 @@
-package rules.remote;
+package rules;
 import com.foxwho.springbootdroolsdemo.model.CartModel
 import com.foxwho.springbootdroolsdemo.model.GoodsModel
 import com.foxwho.springbootdroolsdemo.model.StockModel
@@ -37,7 +37,9 @@ rule "is cart"
          $cart : CartModel(goodsId>0)
          eval(isNotBlank($cart.getName()))
     then
+        $cart.setName($cart.getName()+"====>");
         System.out.println("这是购物车商品:"+$cart.getName());
+//        update($cart);
 end
 
 rule "商品名称包含 【奶粉】关键字不允许购买"

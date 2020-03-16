@@ -5,21 +5,17 @@ import com.foxwho.springbootdroolsdemo.model.GoodsModel;
 import com.foxwho.springbootdroolsdemo.model.StockModel;
 import com.foxwho.springbootdroolsdemo.service.CartProces;
 import lombok.extern.slf4j.Slf4j;
-import org.kie.api.KieBase;
 import org.kie.api.builder.Message;
 import org.kie.api.builder.Results;
 import org.kie.api.io.Resource;
 import org.kie.api.io.ResourceType;
 import org.kie.api.runtime.KieSession;
-import org.kie.api.runtime.StatelessKieSession;
 import org.kie.api.runtime.rule.FactHandle;
 import org.kie.internal.io.ResourceFactory;
 import org.kie.internal.utils.KieHelper;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 
@@ -28,8 +24,68 @@ import java.math.BigDecimal;
 public class CartProcessImpl implements CartProces {
     @Override
     public CartModel process(CartModel cartModel) {
+        try {
+            if (kieHelperStatic == null) {
+                process3(cartModel);
+                log.info("INIT 11111 kieHelper");
+                log.info("INIT 11111 kieHelper");
+                log.info("INIT 11111 kieHelper");
+            } else {
+                log.info("NOT INIT kieHelper");
+            }
+            KieSession kieSession = kieHelperStatic.build().newKieSession();
+            FactHandle insert = kieSession.insert(cartModel);
+            FactHandle insert1 = kieSession.insert(goods());
+            FactHandle insert2 = kieSession.insert(stock());
+            int i = kieSession.fireAllRules();
+            System.out.println(cartModel.getName() + "    " + i + "次");
+            //压测
+            kieSession.delete(insert);
+            kieSession.delete(insert1);
+            kieSession.delete(insert2);
+            kieSession.dispose();
+        } catch (Exception e) {
+            //e.printStackTrace();
+            log.info("FileNotFoundException ={}", e.getMessage(), e);
+        }
+        return null;
+    }
 
-        String file = "rule/cart.drl";
+    private static KieHelper kieHelperStatic;
+
+    public KieHelper process3(CartModel cartModel) {
+
+        String file = "rules/cart.drl";
+        try {
+            kieHelperStatic = new KieHelper();
+            ClassPathResource classPathResource = new ClassPathResource(file);
+            //InputStream inputStream2 =classPathResource.getInputStream();
+            //log.info("inputStream1 ={}",inputStream2);
+            InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(file);
+            log.info("inputStream2 ={}", inputStream);
+            //InputStream fileInputStream = this.getClass().getResourceAsStream(file);
+            //log.info("fileInputStream3 ={}",fileInputStream);
+            Resource resource = ResourceFactory.newInputStreamResource(inputStream);
+            kieHelperStatic.addResource(resource, ResourceType.DRL);
+            //kieHelper.addContent("",ResourceType.DRL);
+
+            Results results = kieHelperStatic.verify();
+            if (results.hasMessages(Message.Level.ERROR)) {
+                System.out.println(results.getMessages());
+                log.error("rule error ={}", results.getMessages());
+                throw new IllegalStateException("### errors ###");
+            }
+            return kieHelperStatic;
+        } catch (Exception e) {
+            //e.printStackTrace();
+            log.info("FileNotFoundException ={}", e.getMessage(), e);
+        }
+        return null;
+    }
+
+    public CartModel process2(CartModel cartModel) {
+
+        String file = "rules/cart.drl";
 
         KieHelper kieHelper = new KieHelper();
         try {
@@ -37,7 +93,7 @@ public class CartProcessImpl implements CartProces {
             //InputStream inputStream2 =classPathResource.getInputStream();
             //log.info("inputStream1 ={}",inputStream2);
             InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(file);
-            log.info("inputStream2 ={}",inputStream);
+            log.info("inputStream2 ={}", inputStream);
             //InputStream fileInputStream = this.getClass().getResourceAsStream(file);
             //log.info("fileInputStream3 ={}",fileInputStream);
             Resource resource = ResourceFactory.newInputStreamResource(inputStream);

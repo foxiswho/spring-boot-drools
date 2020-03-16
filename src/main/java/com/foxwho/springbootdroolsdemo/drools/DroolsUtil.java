@@ -43,7 +43,7 @@ public class DroolsUtil {
         //kieSession.dispose();
 
 
-        String file = "rule/cart.drl";
+        String file = "rules/cart.drl";
         //FileInputStream fileInputStream = new FileInputStream(file);
         //Resource resource2 = new ClassPathResource(file);
         //InputStream fileInputStream = resource2.getInputStream();

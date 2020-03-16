@@ -4,6 +4,7 @@ import com.foxwho.springbootdroolsdemo.model.CartModel;
 import com.foxwho.springbootdroolsdemo.service.CartProces;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
@@ -15,6 +16,7 @@ public class CartController {
     @Autowired
     private CartProces cartProces;
 
+    @GetMapping("/demo")
     public String index() {
         CartModel cartModel = new CartModel();
         cartModel.setGoodsId(1L);
