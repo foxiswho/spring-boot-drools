@@ -1,5 +1,6 @@
 package com.foxwho.springbootdroolsdemo.service.impl;
 
+import com.foxwho.springbootdroolsdemo.drools.DroolsUtil;
 import com.foxwho.springbootdroolsdemo.model.CartModel;
 import com.foxwho.springbootdroolsdemo.model.GoodsModel;
 import com.foxwho.springbootdroolsdemo.model.StockModel;
@@ -22,109 +23,35 @@ import java.math.BigDecimal;
 @Slf4j
 @Service
 public class CartProcessImpl implements CartProces {
+    private static DroolsUtil droolsUtil;
+
     @Override
     public CartModel process(CartModel cartModel) {
         try {
-            if (kieHelperStatic == null) {
-                process3(cartModel);
+            if (droolsUtil == null) {
+                droolsUtil = DroolsUtil.getInstance();
+                //加载规则
+                droolsUtil.loadRuleResourcesFile("rules/cart.drl");
+                droolsUtil.verify();
+
                 log.info("INIT 11111 kieHelper");
                 log.info("INIT 11111 kieHelper");
                 log.info("INIT 11111 kieHelper");
             } else {
                 log.info("NOT INIT kieHelper");
             }
-            KieSession kieSession = kieHelperStatic.build().newKieSession();
+            KieSession kieSession = droolsUtil.buildNewKieSession();
             FactHandle insert = kieSession.insert(cartModel);
             FactHandle insert1 = kieSession.insert(goods());
             FactHandle insert2 = kieSession.insert(stock());
             int i = kieSession.fireAllRules();
-            System.out.println(cartModel.getName() + "    " + i + "次");
+            log.info("规则 运行次数：{}, 商品名称: {}", i, cartModel.getName());
             //压测
             kieSession.delete(insert);
             kieSession.delete(insert1);
             kieSession.delete(insert2);
             kieSession.dispose();
         } catch (Exception e) {
-            //e.printStackTrace();
-            log.info("FileNotFoundException ={}", e.getMessage(), e);
-        }
-        return null;
-    }
-
-    private static KieHelper kieHelperStatic;
-
-    public KieHelper process3(CartModel cartModel) {
-
-        String file = "rules/cart.drl";
-        try {
-            kieHelperStatic = new KieHelper();
-            ClassPathResource classPathResource = new ClassPathResource(file);
-            //InputStream inputStream2 =classPathResource.getInputStream();
-            //log.info("inputStream1 ={}",inputStream2);
-            InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(file);
-            log.info("inputStream2 ={}", inputStream);
-            //InputStream fileInputStream = this.getClass().getResourceAsStream(file);
-            //log.info("fileInputStream3 ={}",fileInputStream);
-            Resource resource = ResourceFactory.newInputStreamResource(inputStream);
-            kieHelperStatic.addResource(resource, ResourceType.DRL);
-            //kieHelper.addContent("",ResourceType.DRL);
-
-            Results results = kieHelperStatic.verify();
-            if (results.hasMessages(Message.Level.ERROR)) {
-                System.out.println(results.getMessages());
-                log.error("rule error ={}", results.getMessages());
-                throw new IllegalStateException("### errors ###");
-            }
-            return kieHelperStatic;
-        } catch (Exception e) {
-            //e.printStackTrace();
-            log.info("FileNotFoundException ={}", e.getMessage(), e);
-        }
-        return null;
-    }
-
-    public CartModel process2(CartModel cartModel) {
-
-        String file = "rules/cart.drl";
-
-        KieHelper kieHelper = new KieHelper();
-        try {
-            ClassPathResource classPathResource = new ClassPathResource(file);
-            //InputStream inputStream2 =classPathResource.getInputStream();
-            //log.info("inputStream1 ={}",inputStream2);
-            InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(file);
-            log.info("inputStream2 ={}", inputStream);
-            //InputStream fileInputStream = this.getClass().getResourceAsStream(file);
-            //log.info("fileInputStream3 ={}",fileInputStream);
-            Resource resource = ResourceFactory.newInputStreamResource(inputStream);
-            kieHelper.addResource(resource, ResourceType.DRL);
-            //kieHelper.addContent("",ResourceType.DRL);
-
-            Results results = kieHelper.verify();
-            if (results.hasMessages(Message.Level.ERROR)) {
-                System.out.println(results.getMessages());
-                log.error("rule error ={}", results.getMessages());
-                throw new IllegalStateException("### errors ###");
-            }
-
-            //KieBase build = kieHelper.build();
-
-            //StatelessKieSession kieSession = kieHelper.build().newStatelessKieSession();
-            //StatelessKieSession statelessKieSession = build.newStatelessKieSession();
-            //KieSession kieSession2 = build.newKieSession();
-            KieSession kieSession = kieHelper.build().newKieSession();
-            FactHandle insert = kieSession.insert(cartModel);
-            FactHandle insert1 = kieSession.insert(goods());
-            FactHandle insert2 = kieSession.insert(stock());
-            int i = kieSession.fireAllRules();
-            System.out.println(cartModel.getName() + "    " + i + "次");
-            //压测
-            kieSession.delete(insert);
-            kieSession.delete(insert1);
-            kieSession.delete(insert2);
-            kieSession.dispose();
-        } catch (Exception e) {
-            //e.printStackTrace();
             log.info("FileNotFoundException ={}", e.getMessage(), e);
         }
         return null;
