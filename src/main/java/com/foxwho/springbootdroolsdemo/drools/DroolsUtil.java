@@ -1,20 +1,15 @@
 package com.foxwho.springbootdroolsdemo.drools;
 
-import com.foxwho.springbootdroolsdemo.model.CartModel;
-import com.foxwho.springbootdroolsdemo.model.GoodsModel;
-import com.foxwho.springbootdroolsdemo.model.StockModel;
 import lombok.extern.slf4j.Slf4j;
 import org.kie.api.builder.Message;
 import org.kie.api.builder.Results;
 import org.kie.api.io.Resource;
 import org.kie.api.io.ResourceType;
 import org.kie.api.runtime.KieSession;
-import org.kie.api.runtime.rule.FactHandle;
 import org.kie.internal.io.ResourceFactory;
 import org.kie.internal.utils.KieHelper;
 
 import java.io.InputStream;
-import java.math.BigDecimal;
 
 @Slf4j
 public class DroolsUtil {

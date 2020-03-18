@@ -1,11 +1,15 @@
 package com.foxwho.springbootdroolsdemo.model;
 
+import cn.hutool.core.builder.EqualsBuilder;
+import cn.hutool.core.builder.HashCodeBuilder;
 import lombok.Data;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 @Data
-public class CartModel {
+public class CartModel implements Serializable {
     /**
      * id
      */
@@ -28,4 +32,19 @@ public class CartModel {
     private Long num;
 
     private int next = 0;
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return EqualsBuilder.reflectionEquals(this, o);
+    }
+
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
 }
