@@ -73,17 +73,12 @@ public class DroolsUtil {
      * @return
      */
     public KieHelper verify() {
-        try {
-            Results results = kieHelper.verify();
-            if (results.hasMessages(Message.Level.ERROR)) {
-                log.error("rule error ={}", results.getMessages());
-                throw new IllegalStateException("rule error: " + results.getMessages());
-            }
-            return kieHelper;
-        } catch (Exception e) {
-            log.info("FileNotFoundException ={}", e.getMessage(), e);
+        Results results = kieHelper.verify();
+        if (results.hasMessages(Message.Level.ERROR)) {
+            log.error("rule error ={}", results.getMessages());
+            throw new IllegalStateException("rule error: " + results.getMessages());
         }
-        return null;
+        return kieHelper;
     }
 
     /**
