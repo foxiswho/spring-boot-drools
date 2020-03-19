@@ -20,6 +20,7 @@ public class CartController {
 
     @GetMapping("/demo")
     public WrapperDrools index(Long goodsId, Long num, String name) {
+        // 默认参数赋值
         if (goodsId == null) {
             goodsId = 1L;
         }
@@ -32,11 +33,13 @@ public class CartController {
         log.info("GET 参数,goodsId={},num={}", goodsId, num);
         //String format = StrUtil.format("最小购买数 不能小于 {} 或 最大购买数 不能大于 {}", 1, 5);
         //log.info("StrUtil.format ：{}",format);
+        // 购物车 对象
         CartModel cartModel = new CartModel();
         cartModel.setGoodsId(goodsId);
         cartModel.setName(name);
         cartModel.setPrice(new BigDecimal("200"));
         cartModel.setNum(num);
+        //执行 service
         WrapperDrools process = cartProces.process(cartModel);
         return process;
     }

@@ -26,15 +26,21 @@ import java.math.BigDecimal;
 @Slf4j
 @Service
 public class CartProcessImpl implements CartProces {
+    /**
+     * 实例化日志 对象，方便 drools 内部使用
+     */
     private static final Logger LOG = LoggerFactory.getLogger(CartProcessImpl.class);
 
     private static DroolsUtil droolsUtil;
 
     @Override
     public WrapperDrools process(CartModel cartModel) {
+        // 初始化 返回值对象
         WrapperDrools wrapperDrools = new WrapperDrools();
         try {
+            //检测 droolsUtil 是否已实例化，如果没有则 进行 实例化相关操作
             if (droolsUtil == null) {
+                //实例化
                 droolsUtil = DroolsUtil.getInstance();
                 //加载规则
                 droolsUtil.loadRuleResourcesFile("rules/cart.drl");
@@ -47,18 +53,21 @@ public class CartProcessImpl implements CartProces {
             } else {
                 log.info("NOT INIT kieHelper");
             }
+            //返回 加载规则后的 kieSession
             KieSession kieSession = droolsUtil.buildNewKieSession();
-            //插入 对象，获取 对象所对应的内存句柄
+
             log.info("购物车数据：{}", cartModel);
+            //插入 对象，获取 对象所对应的内存句柄
             FactHandle insert = kieSession.insert(cartModel);
             FactHandle insert1 = kieSession.insert(goods());
             FactHandle insert2 = kieSession.insert(stock());
             //
-
             log.info("wrapperDrools: {}", wrapperDrools);
+            // 传入 全局公共 service 类对象
+            // 传入，返回值类，日志类
             kieSession.setGlobal("wrapperDrools", wrapperDrools);
             kieSession.setGlobal("LOG", LOG);
-            //
+            // 执行 所有规则，并返回 执行条数
             int i = kieSession.fireAllRules();
             log.info("规则 运行次数：{}, 商品名称: {}", i, cartModel.getName());
             //删除 fact 内存句柄
@@ -77,7 +86,7 @@ public class CartProcessImpl implements CartProces {
     }
 
     /**
-     * 商品
+     * 商品 数据
      *
      * @return
      */
@@ -93,7 +102,7 @@ public class CartProcessImpl implements CartProces {
     }
 
     /**
-     * 库存
+     * 库存 数据
      *
      * @return
      */

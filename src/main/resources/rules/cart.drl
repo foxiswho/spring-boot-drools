@@ -13,23 +13,25 @@ import function cn.hutool.core.util.StrUtil.format;
 import function com.foxwho.springbootdroolsdemo.util.StrDemoUtil.containsStr;
 
 //下面 service 类的 传入, 日志类[Logger]， 返回值类[WrapperDrools]
-import org.slf4j.Logger;
-import com.foxwho.springbootdroolsdemo.util.WrapperDrools;
+//import org.slf4j.Logger;
+//import com.foxwho.springbootdroolsdemo.util.WrapperDrools;
 
 //下面 是对应 service 类的公共变量
-global WrapperDrools wrapperDrools;
-global Logger LOG;
+global com.foxwho.springbootdroolsdemo.util.WrapperDrools wrapperDrools;
+global org.slf4j.Logger LOG;
 
 dialect  "java"
 
 rule "goodsId not 0"
     salience 1
     when
-         $cart : CartModel(goodsId==null || goodsId<1,next!=1)
+         $cart : CartModel(goodsId==null || goodsId<1,next==true)
 //         $cart : CartModel(getGoodsId()==null || getGoodsId()<1,getNext()!=1)
+        //判断 名称为空 则执行 then
          eval(isBlank($cart.getName()))
     then
-        $cart.setNext(1);
+        //设置 不在执行后续规则
+        $cart.setNext(false);
 //        System.out.println("购物车中 商品数据 错误");
         LOG.info("drools-rule-log:{}","购物车中 商品数据 错误");
 
@@ -41,10 +43,11 @@ end
 rule "good getName"
     salience 2
     when
-         $cart : CartModel(goodsId>0,next!=1)
+         $cart : CartModel(goodsId>0,next==true)
          eval(isBlank($cart.getName()))
     then
-        $cart.setNext(1);
+        //设置 不在执行后续规则
+        $cart.setNext(false);
 //        System.out.println("商品名称不能为空");
         LOG.info("drools-rule-log:商品名称不能为空 {}",$cart);
 
@@ -62,6 +65,7 @@ rule "is cart"
          $cart : CartModel(goodsId>0)
          eval(isNotBlank($cart.getName()))
     then
+        // 给购物车中的 商品名称 加 几个字符
         $cart.setName($cart.getName()+"====>");
 //        System.out.println("这是购物车商品:"+$cart.getName());
         LOG.info("drools-rule-log:这是购物车商品 {}",$cart.getName());
@@ -73,10 +77,11 @@ rule "商品名称包含 【奶粉】关键字不允许购买"
     salience 4
     no-loop true
     when
-         $cart : CartModel(name contains "奶粉" ,next!=1)
+         $cart : CartModel(name contains "奶粉" ,next==true)
 //         eval(containsStr($cart.getName(),"奶粉"))
     then
-        $cart.setNext(1);
+        //设置 不在执行后续规则
+        $cart.setNext(false);
 
         LOG.info("drools-rule-log:商品名称包含 【奶粉】关键字不允许购买 {}",$cart.getName());
 
@@ -89,9 +94,10 @@ rule "购买数量"
     salience 5
     no-loop true
     when
-         $cart : CartModel(num<1,next!=1)
+         $cart : CartModel(num<1,next==true)
     then
-        $cart.setNext(1);
+        //设置 不在执行后续规则
+        $cart.setNext(false);
 //        System.out.println("购买数量不能小于1");
         LOG.info("drools-rule-log:购买数量不能小于1");
 
@@ -103,9 +109,10 @@ rule "最小 大购买数"
     no-loop true
     when
         $goods : GoodsModel()
-        $cart : CartModel(num<$goods.min||num>$goods.max,next!=1)
+        $cart : CartModel(num<$goods.min||num>$goods.max,next==true)
     then
-        $cart.setNext(1);
+        //设置 不在执行后续规则
+        $cart.setNext(false);
 //        System.out.println("最小购买数 不能小于"+$goods.getMin());
 //        System.out.println("最大购买数 不能小于"+$goods.getMax());
 
@@ -124,9 +131,10 @@ rule "库存"
     no-loop true
     when
         $stock : StockModel(num>0)
-        $cart : CartModel(num>$stock.num,next!=1)
+        $cart : CartModel(num>$stock.num,next==true)
     then
-        $cart.setNext(1);
+        //设置 不在执行后续规则
+        $cart.setNext(false);
 //        System.out.println("购物车 num:"+$cart.getNum());
 //        System.out.println("库存 num:"+$stock.getNum());
         LOG.info("drools-rule-log:购物车 num: {}",$cart.getNum());

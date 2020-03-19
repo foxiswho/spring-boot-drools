@@ -14,6 +14,7 @@ import java.io.InputStream;
 @Slf4j
 public class DroolsUtil {
 
+    //实例化 kie帮助类
     private KieHelper kieHelper = new KieHelper();
 
     public void DroolsUtil() {
@@ -82,7 +83,7 @@ public class DroolsUtil {
     }
 
     /**
-     * 编译
+     * 编译 返回  KieSession
      *
      * @return
      */
@@ -90,6 +91,9 @@ public class DroolsUtil {
         return kieHelper.build().newKieSession();
     }
 
+    /**
+     * 案例
+     */
     public static void demo() {
         /*
 
