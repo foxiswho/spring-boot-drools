@@ -1,0 +1,36 @@
+package rules.goods;
+// 上面部分定义包名称
+
+//下面 CartModel 部分 ，由 kieSession.insert 传入的对象
+import com.foxwho.springbootdroolsdemo.model.GoodsModel
+
+//下面 静态方法类 ，引用要具体 类的方法
+import function cn.hutool.core.util.StrUtil.isNotBlank;
+import function cn.hutool.core.util.StrUtil.isBlank;
+import function cn.hutool.core.util.StrUtil.format;
+import function com.foxwho.springbootdroolsdemo.util.StrDemoUtil.containsStr;
+
+//下面 service 类的 传入, 日志类[Logger]， 返回值类[WrapperDrools]
+//import org.slf4j.Logger;
+//import com.foxwho.springbootdroolsdemo.util.WrapperDrools;
+
+//下面 是对应 service 类的公共变量
+global com.foxwho.springbootdroolsdemo.util.WrapperDrools wrapperDrools;
+global org.slf4j.Logger LOG;
+
+dialect  "java"
+
+rule "最小 大购买数2"
+    salience 6
+    no-loop true
+    when
+        $goods : GoodsModel(id==null||id<1,next==true)
+    then
+        //设置 不在执行后续规则
+        $goods.setNext(false);
+
+        LOG.info("drools-rule-log:商品ID 错误 {}",$goods.getId());
+        wrapperDrools.error("商品ID 错误 "+$goods.getId());
+
+        update($goods);
+end

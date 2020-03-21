@@ -1,4 +1,4 @@
-package rules;
+package rules.cart;
 // 上面部分定义包名称
 
 //下面 CartModel 部分 ，由 kieSession.insert 传入的对象

@@ -27,4 +27,10 @@ public class GoodsModel {
      * 最大购买数量
      */
     private Long max;
+    /**
+     * 因为没有找到 怎么停止 不在执行后续规则的方法，所以这里 取了一个巧
+     * 这里是 配合 drools 不在执行后续规则 的额外参数
+     * true 可以继续执行后续规则， false 不在执行后续规则
+     */
+    private boolean next = true;
 }
